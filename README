@@ -8,6 +8,9 @@ To best of my knowledge, в нём отсутствуют баги, но это 
  $ cd cik-spider/
  $ mvn clean install
 
+Бинарные билды доступны здесь:
+ http://shipilev.net/builds/cikrf-spider/
+
 *** СКАЧИВАНИЕ ДАННЫХ ***
 
   Робот ходит по сайту ЦИКа и сваливает страницы первого/второго/третьего уровня
