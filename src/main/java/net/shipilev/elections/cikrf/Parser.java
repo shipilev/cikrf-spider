@@ -347,7 +347,6 @@ public class Parser {
                 String text = rowSums.get(i);
 
                 // спасибо деду за строчки типа "125 (35%)"!
-                System.err.println(text);
                 if (!text.trim().isEmpty()) {
                     int value = Integer.valueOf(text.split(" ")[0]);
                     allData.add(g.aid("Сумма"), rowNames.get(i), value);
