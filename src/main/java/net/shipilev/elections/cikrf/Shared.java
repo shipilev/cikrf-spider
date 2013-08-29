@@ -83,6 +83,8 @@ public class Shared {
                 .withRequiredArg().describedAs("pages").ofType(Integer.class)
                 .defaultsTo(Integer.MAX_VALUE);
 
+        OptionSpec<Boolean> shouldCheck = parser.accepts("c", "Cross-check the data").withRequiredArg().ofType(boolean.class).defaultsTo(true);
+
         OptionSet set = null;
         try {
             set = parser.parse(args);
@@ -102,7 +104,7 @@ public class Shared {
         wideLimit = set.valueOf(oWideLimit);
         rootURL = set.valueOf(oRootURL);
         thinkTime = set.valueOf(oThinkTime);
-        checkSummaries = set.has("c");
+        checkSummaries = set.valueOf(shouldCheck);
     }
 
     public static Document download(String url) throws InterruptedException {

@@ -44,8 +44,6 @@ import java.util.regex.Pattern;
 public class Parser {
 
     private boolean headerPrinted;
-    private final PrintWriter summary;
-    private final PrintWriter checkSummary;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Shared.init(args);
@@ -57,32 +55,64 @@ public class Parser {
         SummaryData tikSummary = p.parsePages(Shared.pageDir, "first-", "output-tiks.csv", true);
         SummaryData uikSummary = p.parsePages(Shared.pageDir, "third-", "output-uiks.csv", false);
 
-        p.checkSummaries(cikSummary, tikSummary, uikSummary);
+        PrintWriter pw = new PrintWriter(System.out);
+        pw.println();
 
-//        p.parsePages(Shared.pageDir, "third-", "output-uiks.csv");
+        p.printSummaries(pw, "CIK", cikSummary);
+        p.printSummaries(pw, "TIK", tikSummary);
+        p.printSummaries(pw, "UIK", uikSummary);
+
+        p.checkSummaries(pw, cikSummary, tikSummary, uikSummary);
+
+        pw = new PrintWriter(Shared.resultsDir + "/" + "summary.log", "UTF-8");
+        p.printSummaries(pw, "CIK", cikSummary);
+        p.printSummaries(pw, "TIK", tikSummary);
+        p.printSummaries(pw, "UIK", uikSummary);
+        pw.close();
+
+        pw = new PrintWriter(Shared.resultsDir + "/" + "checkSummary.log", "UTF-8");
+        p.checkSummaries(pw, cikSummary, tikSummary, uikSummary);
+        pw.close();
     }
 
-    private void checkSummaries(SummaryData cik, SummaryData tik, SummaryData uik) {
-        if (Shared.checkSummaries) {
-            checkSummary.println(" --------------- CHECKING DIFFERENCE BETWEEN 'CIK' AND 'TIK' -------------------");
-            summaryCompare(cik, tik);
-            checkSummary.println();
+    private void printSummaries(PrintWriter pw, String label, SummaryData data) {
+        Set<List<String>> keys = data.keys();
+        if (keys.isEmpty()) return;
 
-            checkSummary.println(" --------------- CHECKING DIFFERENCE BETWEEN 'CIK' AND 'UIK' -------------------");
-            summaryCompare(cik, uik);
-            checkSummary.println();
+        List<String> arg = keys.iterator().next();
 
-            checkSummary.println(" --------------- CHECKING DIFFERENCE BETWEEN 'TIK' AND 'UIK' -------------------");
-            summaryCompare(tik, uik);
-            checkSummary.println();
+        pw.printf("**** Summary for %s (aggregate over %s):\n", label, arg.toString());
+        Multiset<Metric> set = data.get(arg);
+        for (Metric s : set.elementSet()) {
+            pw.printf("%15d : %s\n", set.count(s), s.getLabel());
         }
+        pw.printf("\n");
+        pw.flush();
+    }
+
+    private void checkSummaries(PrintWriter pw, SummaryData cik, SummaryData tik, SummaryData uik) {
+        if (Shared.checkSummaries) {
+            pw.println("**** Checking totals between 'CIK' and 'TIK':");
+            summaryCompare(pw, cik, tik);
+            pw.println();
+
+            pw.println("**** Checking totals between 'CIK' and 'UIK':");
+            summaryCompare(pw, cik, uik);
+            pw.println();
+
+            pw.println("**** Checking totals between 'TIK' and 'UIK':");
+            summaryCompare(pw, tik, uik);
+            pw.println();
+        }
+        pw.flush();
     }
     
-    private void summaryCompare(SummaryData summ1, SummaryData summ2) {
+    private void summaryCompare(PrintWriter pw, SummaryData summ1, SummaryData summ2) {
         HashSet<List<String>> geos = new HashSet<List<String>>();
         geos.addAll(summ1.keys());
         geos.retainAll(summ2.keys());
 
+        boolean foundAnomalies = false;
         for (List<String> geo : geos) {
             Multiset<Metric> val1 = summ1.get(geo);
             Multiset<Metric> val2 = summ2.get(geo);
@@ -92,26 +122,28 @@ public class Parser {
             metrics.addAll(val2.elementSet());
 
             if (!val1.equals(val2)) {
-                checkSummary.printf("Found mismatches in aggregates over %s:\n", geo);
+                foundAnomalies = true;
+                pw.printf("Found mismatches in aggregates over %s:\n", geo);
                 for (Metric key : metrics) {
                     Integer v1 = val1.count(key);
                     Integer v2 = val2.count(key);
 
                     if (!v1.equals(v2)) {
-                        checkSummary.printf(" {%9d} vs {%9d} [%4.1f%%]: %s\n", v1, v2, (v1 * 100.0 / v2 - 100), key);
+                        pw.printf(" {%9d} vs {%9d} [%4.1f%%]: %s\n", v1, v2, (v1 * 100.0 / v2 - 100), key);
                     }
                 }
-                checkSummary.println();
+                pw.println();
             }
-
-            checkSummary.flush();
         }
 
+        if (!foundAnomalies) {
+            pw.println("Everything is consistent.");
+        }
+
+        pw.flush();
     }
 
     public Parser() throws FileNotFoundException, UnsupportedEncodingException {
-        summary = new PrintWriter(Shared.resultsDir + "/" + "summary.log", "UTF-8");
-        checkSummary = new PrintWriter(Shared.resultsDir + "/" + "checkSummary.log", "UTF-8");
     }
 
     private SummaryData parsePages(String dataPath, final String input, String output, boolean parseLast) throws IOException {
@@ -169,16 +201,6 @@ public class Parser {
             summaryData.add(arg, overall.aggregate(arg));
         }
         
-        for (List<String> arg : args) {
-            summary.printf("Summary for %s (aggregate over %s):\n", output, arg.toString());
-            Multiset<Metric> set = summaryData.get(arg);
-            for (Metric s : set.elementSet()) {
-                summary.printf("%15d : %s\n", set.count(s), s.getLabel());
-            }
-            summary.printf("\n");
-            summary.flush();
-        }
-
         return summaryData;
     }
 
