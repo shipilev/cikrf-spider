@@ -58,16 +58,16 @@ public class Parser {
         PrintWriter pw = new PrintWriter(System.out);
         pw.println();
 
-        p.printSummaries(pw, "CIK", cikSummary);
-        p.printSummaries(pw, "TIK", tikSummary);
-        p.printSummaries(pw, "UIK", uikSummary);
+        p.printSummaries(pw, "CIK", cikSummary, Collections.<String>emptyList());
+        p.printSummaries(pw, "TIK", tikSummary, Collections.<String>emptyList());
+        p.printSummaries(pw, "UIK", uikSummary, Collections.<String>emptyList());
 
         p.checkSummaries(pw, cikSummary, tikSummary, uikSummary);
 
         pw = new PrintWriter(Shared.resultsDir + "/" + "summary.log", "UTF-8");
-        p.printSummaries(pw, "CIK", cikSummary);
-        p.printSummaries(pw, "TIK", tikSummary);
-        p.printSummaries(pw, "UIK", uikSummary);
+        p.printSummaries(pw, "CIK", cikSummary, Collections.<String>emptyList());
+        p.printSummaries(pw, "TIK", tikSummary, Collections.<String>emptyList());
+        p.printSummaries(pw, "UIK", uikSummary, Collections.<String>emptyList());
         pw.close();
 
         pw = new PrintWriter(Shared.resultsDir + "/" + "checkSummary.log", "UTF-8");
@@ -75,14 +75,9 @@ public class Parser {
         pw.close();
     }
 
-    private void printSummaries(PrintWriter pw, String label, SummaryData data) {
-        Set<List<String>> keys = data.keys();
-        if (keys.isEmpty()) return;
-
-        List<String> arg = keys.iterator().next();
-
-        pw.printf("**** Summary for %s (aggregate over %s):\n", label, arg.toString());
-        Multiset<Metric> set = data.get(arg);
+    private void printSummaries(PrintWriter pw, String label, SummaryData data, List<String> key) {
+        pw.printf("**** Summary for %s (aggregate over %s):\n", label, key.toString());
+        Multiset<Metric> set = data.get(key);
         for (Metric s : set.elementSet()) {
             pw.printf("%15d : %s\n", set.count(s), s.getLabel());
         }
