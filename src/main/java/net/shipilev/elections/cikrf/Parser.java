@@ -84,16 +84,16 @@ public class Parser {
         geos.retainAll(summ2.keys());
 
         for (List<String> geo : geos) {
-            Multiset<String> val1 = summ1.get(geo);
-            Multiset<String> val2 = summ2.get(geo);
+            Multiset<Metric> val1 = summ1.get(geo);
+            Multiset<Metric> val2 = summ2.get(geo);
 
-            Collection<String> metrics = new TreeSet<String>();
+            Collection<Metric> metrics = new TreeSet<Metric>();
             metrics.addAll(val1.elementSet());
             metrics.addAll(val2.elementSet());
 
             if (!val1.equals(val2)) {
                 checkSummary.printf("Found mismatches in aggregates over %s:\n", geo);
-                for (String key : metrics) {
+                for (Metric key : metrics) {
                     Integer v1 = val1.count(key);
                     Integer v2 = val2.count(key);
 
@@ -171,9 +171,9 @@ public class Parser {
         
         for (List<String> arg : args) {
             summary.printf("Summary for %s (aggregate over %s):\n", output, arg.toString());
-            Multiset<String> set = summaryData.get(arg);
-            for (String s : set.elementSet()) {
-                summary.printf("%15d : %s\n", set.count(s), s);
+            Multiset<Metric> set = summaryData.get(arg);
+            for (Metric s : set.elementSet()) {
+                summary.printf("%15d : %s\n", set.count(s), s.getLabel());
             }
             summary.printf("\n");
             summary.flush();
@@ -182,19 +182,56 @@ public class Parser {
         return summaryData;
     }
 
+    public static class Metric implements Comparable<Metric> {
+
+        private final int index;
+        private final String label;
+
+        public Metric(int index, String label) {
+            this.index = index;
+            this.label = label;
+        }
+
+        @Override
+        public int compareTo(Metric o) {
+            return Integer.valueOf(index).compareTo(o.index);
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Metric metric = (Metric) o;
+
+            if (index != metric.index) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return index;
+        }
+    }
+
     public static class SummaryData {
         
-        private final Map<List<String>, Multiset<String>> map;
+        private final Map<List<String>, Multiset<Metric>> map;
         
         public SummaryData() {
-            this.map = new HashMap<List<String>, Multiset<String>>();
+            this.map = new HashMap<List<String>, Multiset<Metric>>();
         }
         
-        public void add(List<String> coords, Multiset<String> e) {
+        public void add(List<String> coords, Multiset<Metric> e) {
             map.put(coords, e);
         }
 
-        public Multiset<String> get(List<String> arg) {
+        public Multiset<Metric> get(List<String> arg) {
             return map.get(arg);
         }
 
@@ -211,7 +248,7 @@ public class Parser {
             COORD_MAX = Math.max(COORD_MAX, g.size());
         }
         
-        Collection<String> metrics = data.getMetrics();
+        Collection<Metric> metrics = data.getMetrics();
 
         if (!headerPrinted) {
             headerPrinted = true;
@@ -220,15 +257,15 @@ public class Parser {
             }
             pw.print("\"ИК\""); // compensate for UIK name
 
-            for (String name : metrics) {
+            for (Metric name : metrics) {
                 pw.print(",\"");
-                pw.print(pattern.matcher(name).replaceAll(""));
+                pw.print(pattern.matcher(name.getLabel()).replaceAll(""));
                 pw.print("\"");
             }
             pw.println();
         }
 
-        for (Map.Entry<Geography, Multiset<String>> entry : data.asMap().entrySet()) {
+        for (Map.Entry<Geography, Multiset<Metric>> entry : data.asMap().entrySet()) {
             Geography g = entry.getKey();
             for (int c = 0; c < COORD_MAX - 1; c++) {
                 pw.print("\"");
@@ -238,7 +275,7 @@ public class Parser {
             pw.print("\"");
             pw.print(pattern.matcher(g.get(COORD_MAX - 1)).replaceAll(""));
             pw.print("\"");
-            for (String k : metrics) {
+            for (Metric k : metrics) {
                 pw.print(",");
                 pw.print(entry.getValue().count(k));
             }
@@ -256,16 +293,18 @@ public class Parser {
         /*
          * Это названия строк
          */
-        List<String> rowNames = new ArrayList<String>();
-        List<String> rowSums = new ArrayList<String>();
+        List<Metric> rowNames = new ArrayList<Metric>();
+        List<Metric> rowSums = new ArrayList<Metric>();
+
+        int index = 0;
         for (Element element : descripts) {
             Elements tds = element.children();
             if (tds.size() >= 3) {
                 String text = tds.get(1).text();
                 if (!text.contains("ИЗБИРАТЕЛЬНАЯ")) {
-                    rowNames.add(text);
+                    rowNames.add(new Metric(index++, text));
                 }
-                rowSums.add(tds.get(2).text());
+                rowSums.add(new Metric(index++, tds.get(2).text()));
             }
         }
 
@@ -283,14 +322,16 @@ public class Parser {
              */
             rowNames.clear();
             rowSums.clear();
+
+            index = 0;
             for (Element element : descripts) {
                 Elements tds = element.children();
                 if (tds.size() >= 3) {
                     String text = tds.get(1).text();
                     if (!text.contains("ИЗБИРАТЕЛЬНАЯ")) {
-                        rowNames.add(text);
+                        rowNames.add(new Metric(index++, text));
                     }
-                    rowSums.add(tds.get(2).text());
+                    rowSums.add(new Metric(index++, tds.get(2).text()));
                 }
             }
         }
@@ -344,7 +385,7 @@ public class Parser {
          */
         if (data.isEmpty()) {
             for (int i = 0, rowSumsSize = rowSums.size(); i < rowSumsSize; i++) {
-                String text = rowSums.get(i);
+                String text = rowSums.get(i).getLabel();
 
                 // спасибо деду за строчки типа "125 (35%)"!
                 if (!text.trim().isEmpty()) {
@@ -398,16 +439,16 @@ public class Parser {
 
     public static class TableData {
 
-        public final Map<Geography, Multiset<String>> data;
+        public final Map<Geography, Multiset<Metric>> data;
         
         public TableData() {
-            this.data = new TreeMap<Geography, Multiset<String>>();
+            this.data = new TreeMap<Geography, Multiset<Metric>>();
         }
 
-        public void add(Geography g, String label, int value) {
-            Multiset<String> map = data.get(g);
+        public void add(Geography g, Metric label, int value) {
+            Multiset<Metric> map = data.get(g);
             if (map == null) {
-                map = new SortedMultiset<String>();
+                map = new SortedMultiset<Metric>();
                 data.put(g, map);
             }
 
@@ -418,30 +459,30 @@ public class Parser {
             return data.keySet();
         }
 
-        public Collection<String> getMetrics() {
-            Set<String> metrics = new TreeSet<String>();
-            for (Multiset<String> set : data.values()) {
+        public Collection<Metric> getMetrics() {
+            Set<Metric> metrics = new TreeSet<Metric>();
+            for (Multiset<Metric> set : data.values()) {
                 metrics.addAll(set.elementSet());
             }
             return metrics;
         }
 
-        public Map<Geography, Multiset<String>> asMap() {
+        public Map<Geography, Multiset<Metric>> asMap() {
             return data;
         }
 
         public void merge(TableData data) {
-            for (Map.Entry<Geography, Multiset<String>> entry : data.asMap().entrySet()) {
-                Multiset<String> set = entry.getValue();
-                for (String s : set.elementSet()) {
+            for (Map.Entry<Geography, Multiset<Metric>> entry : data.asMap().entrySet()) {
+                Multiset<Metric> set = entry.getValue();
+                for (Metric s : set.elementSet()) {
                     add(entry.getKey(), s, set.count(s));
                 }
             }
         }
 
-        public Multiset<String> aggregate(List<String> coords) {
-            Multiset<String> result = new SortedMultiset<String>();
-            for (Map.Entry<Geography, Multiset<String>> entry: data.entrySet()) {
+        public Multiset<Metric> aggregate(List<String> coords) {
+            Multiset<Metric> result = new SortedMultiset<Metric>();
+            for (Map.Entry<Geography, Multiset<Metric>> entry: data.entrySet()) {
                 Geography g = entry.getKey();
                 
                 boolean match = true;
@@ -450,8 +491,8 @@ public class Parser {
                 }
                 
                 if (match) {
-                    Multiset<String> set = entry.getValue();
-                    for (String k : set.elementSet()) {
+                    Multiset<Metric> set = entry.getValue();
+                    for (Metric k : set.elementSet()) {
                         result.add(k, set.count(k));
                     }
                     
