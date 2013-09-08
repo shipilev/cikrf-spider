@@ -18,7 +18,7 @@ URL1="http://www.moscow_city.vybory.izbirkom.ru/region/region/moscow_city?action
 # MOSCOW AREA MAYOR ELECTIONS, 2013
 URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=75070001571771&vrn=75070001571767&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=75070001571771&type=222"
 
-SLEEP=60
+SLEEP=600
 
 mkdir -p data/moscow/csv data/moscow/web data/mo/csv/ data/mo/web
 
