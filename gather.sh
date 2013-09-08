@@ -7,16 +7,16 @@
 #URL="http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100031793509&vrn=100100031793505&region=0&global=1&sub_region=0&prver=0&pronetvd=null&vibid=100100031793509&type=227"
 
 # MOSCOW MAYOR ELECTIONS, 2003
-URL1="http://www.moscow_city.vybory.izbirkom.ru/region/region/moscow_city?action=show&root=1&tvd=277200079460&vrn=277200079459&region=77&global=&sub_region=0&prver=0&pronetvd=null&vibid=277200079460&type=222"
+#URL1="http://www.moscow_city.vybory.izbirkom.ru/region/region/moscow_city?action=show&root=1&tvd=277200079460&vrn=277200079459&region=77&global=&sub_region=0&prver=0&pronetvd=null&vibid=277200079460&type=222"
 
 # MOSCOW AREA MAYOR ELECTIONS, 2003
-URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=250200072700&vrn=250200072699&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=250200072700&type=222"
+#URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=250200072700&vrn=250200072699&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=250200072700&type=222"
 
 # MOSCOW MAYOR ELECTIONS, 2013
-#URL1="http://www.moscow_city.vybory.izbirkom.ru/region/region/moscow_city?action=show&root=1&tvd=27720001368293&vrn=27720001368289&region=77&global=&sub_region=0&prver=0&pronetvd=null&vibid=27720001368293&type=234"
+URL1="http://www.moscow_city.vybory.izbirkom.ru/region/region/moscow_city?action=show&root=1&tvd=27720001368293&vrn=27720001368289&region=77&global=&sub_region=0&prver=0&pronetvd=null&&type=222"
 
 # MOSCOW AREA MAYOR ELECTIONS, 2013
-#URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=75070001571771&vrn=75070001571767&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=75070001571771&type=222"
+URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=75070001571771&vrn=75070001571767&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=75070001571771&type=222"
 
 SLEEP=60
 
