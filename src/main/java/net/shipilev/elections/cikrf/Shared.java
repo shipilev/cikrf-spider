@@ -77,7 +77,7 @@ public class Shared {
 
         OptionSpec<Integer> oThinkTime = parser.accepts("s", "Time to sleep between network requests.")
                 .withRequiredArg().describedAs("msecs").ofType(Integer.class)
-                .defaultsTo(100);
+                .defaultsTo(200);
 
         OptionSpec<Integer> oWideLimit = parser.accepts("w", "Limit number of pages on each level (useful for debugging, to skip downloading all the pages)")
                 .withRequiredArg().describedAs("pages").ofType(Integer.class)
@@ -191,7 +191,7 @@ public class Shared {
         URL u;
         HttpURLConnection hc = null;
 
-        while (true) {
+        for (int tries = 0; tries < 10; tries++) {
             try {
                 TimeUnit.MILLISECONDS.sleep(thinkTime);
 
@@ -205,6 +205,7 @@ public class Shared {
                 InputStream in;
 
                 hc.setRequestProperty("Accept-Encoding", "gzip, deflate");
+                hc.setRequestProperty("Pragma", "no-cache");
                 if (hc.getResponseCode() == 200) {
                     in = hc.getInputStream();
                     if ("gzip".equals(hc.getHeaderField("Content-Encoding"))) {
@@ -241,6 +242,7 @@ public class Shared {
                 }
             }
         }
+        return "";
     }
 
 }
