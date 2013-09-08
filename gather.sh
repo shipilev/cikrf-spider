@@ -20,7 +20,7 @@ URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=s
 
 SLEEP=60
 
-mkdir -p data/moscow/ data/mo/
+mkdir -p data/moscow/csv data/moscow/web data/mo/csv/ data/mo/web
 
 while true; do
     DATE=$(date +%Y%m%d-%H%M%S)
@@ -32,8 +32,10 @@ while true; do
     tar -c -z -f cikrf-web-mo-$DATE.tar.gz     -C cikrf-web-mo-$DATE/ .
     tar --mtime="8 Sep 2013" -c -z -f cikrf-csv-moscow-$DATE.tar.gz -C cikrf-csv-moscow-$DATE .
     tar --mtime="8 Sep 2013" -c -z -f cikrf-csv-mo-$DATE.tar.gz -C cikrf-csv-mo-$DATE .
-    mv cikrf-*-moscow-*.tar.gz data/moscow/
-    mv cikrf-*-mo-*.tar.gz     data/mo/
+    mv cikrf-csv-moscow-*.tar.gz data/moscow/csv/
+    mv cikrf-web-moscow-*.tar.gz data/moscow/web/
+    mv cikrf-csv-mo-*.tar.gz     data/mo/csv/
+    mv cikrf-web-mo-*.tar.gz     data/mo/web/
     rm -rf cikrf-web-*/
     rm -rf cikrf-csv-*/
 
