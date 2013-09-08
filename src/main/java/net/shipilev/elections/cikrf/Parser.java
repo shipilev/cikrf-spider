@@ -78,8 +78,12 @@ public class Parser {
     private void printSummaries(PrintWriter pw, String label, SummaryData data, List<String> key) {
         pw.printf("**** Summary for %s (aggregate over %s):\n", label, key.toString());
         Multiset<Metric> set = data.get(key);
-        for (Metric s : set.elementSet()) {
-            pw.printf("%15d : %s\n", set.count(s), s.getLabel());
+        if (set == null || set.isEmpty()) {
+            pw.println("No data.");
+        } else {
+            for (Metric s : set.elementSet()) {
+                pw.printf("%15d : %s\n", set.count(s), s.getLabel());
+            }
         }
         pw.printf("\n");
         pw.flush();
@@ -132,7 +136,7 @@ public class Parser {
         }
 
         if (!foundAnomalies) {
-            pw.println("Everything is consistent.");
+            pw.println("No anomalies in data.");
         }
 
         pw.flush();
