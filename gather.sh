@@ -18,6 +18,8 @@ URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=s
 # MOSCOW AREA MAYOR ELECTIONS, 2013
 #URL2="http://www.moscow_reg.vybory.izbirkom.ru/region/region/moscow_reg?action=show&root=1&tvd=75070001571771&vrn=75070001571767&region=50&global=&sub_region=0&prver=0&pronetvd=null&vibid=75070001571771&type=222"
 
+SLEEP=60
+
 mkdir -p data/moscow/ data/mo/
 
 while true; do
@@ -26,13 +28,15 @@ while true; do
     java -Dhttp.agent="CIKRF Spider (Java); please report abuse to IP owner;" -jar cikrf-spider.jar -r "$URL2" -p cikrf-web-mo-$DATE/
     java -jar cikrf-parser.jar -p cikrf-web-moscow-$DATE/ -o cikrf-csv-moscow-$DATE/
     java -jar cikrf-parser.jar -p cikrf-web-mo-$DATE/     -o cikrf-csv-mo-$DATE/
-    tar czf cikrf-web-moscow-$DATE.tar.gz cikrf-web-moscow-$DATE/
-    tar czf cikrf-csv-moscow-$DATE.tar.gz cikrf-csv-moscow-$DATE/
-    tar czf cikrf-web-mo-$DATE.tar.gz     cikrf-web-mo-$DATE/
-    tar czf cikrf-csv-mo-$DATE.tar.gz     cikrf-csv-mo-$DATE/
+    tar -c -z -f cikrf-web-moscow-$DATE.tar.gz -C cikrf-web-moscow-$DATE/ .
+    tar -c -z -f cikrf-web-mo-$DATE.tar.gz     -C cikrf-web-mo-$DATE/ .
+    tar --mtime="8 Sep 2013" -c -z -f cikrf-csv-moscow-$DATE.tar.gz -C cikrf-csv-moscow-$DATE .
+    tar --mtime="8 Sep 2013" -c -z -f cikrf-csv-mo-$DATE.tar.gz -C cikrf-csv-mo-$DATE .
     mv cikrf-*-moscow-*.tar.gz data/moscow/
     mv cikrf-*-mo-*.tar.gz     data/mo/
     rm -rf cikrf-web-*/
     rm -rf cikrf-csv-*/
-    sleep 30
+
+    echo "Sleeping for $SLEEP seconds"
+    sleep $SLEEP
 done
