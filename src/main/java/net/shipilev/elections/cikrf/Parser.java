@@ -238,6 +238,11 @@ public class Parser {
         public int hashCode() {
             return index;
         }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     public static class SummaryData {
