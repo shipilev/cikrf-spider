@@ -57,11 +57,7 @@ public class Shared {
         parser.formatHelpWith(new OptFormatter());
 
         OptionSpec<String> oRootURL = parser.accepts("r", "Root URL on www.cikrf.ru")
-                .withRequiredArg().describedAs("DIR").ofType(String.class)
-// PARLIAMENT ELECTIONS, 2011:
-//                .defaultsTo("http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100028713304&vrn=100100028713299&region=0&global=1&sub_region=0&prver=0&pronetvd=null&vibid=100100028713304&type=233");
-// PRESIDENT ELECTIONS, 2012:
-                .defaultsTo("http://www.vybory.izbirkom.ru/region/region/izbirkom?action=show&root=1&tvd=100100031793509&vrn=100100031793505&region=0&global=1&sub_region=0&prver=0&pronetvd=null&vibid=100100031793509&type=227");
+                .withRequiredArg().describedAs("DIR").ofType(String.class);
 
         OptionSpec<String> oPageDir = parser.accepts("p", "Page download dir. This will be populated by spider, and grabbed by parser.")
                 .withRequiredArg().describedAs("DIR").ofType(String.class)
