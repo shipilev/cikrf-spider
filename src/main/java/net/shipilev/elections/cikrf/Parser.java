@@ -53,7 +53,7 @@ public class Parser {
         Parser p = new Parser();
         SummaryData cikSummary = p.parsePages(Shared.pageDir, "root", "output-ciks.csv", true);
         SummaryData tikSummary = p.parsePages(Shared.pageDir, "first-", "output-tiks.csv", true);
-        SummaryData uikSummary = p.parsePages(Shared.pageDir, "second-", "output-uiks.csv", true);
+        SummaryData uikSummary = p.parsePages(Shared.pageDir, "second-", "output-uiks.csv", false);
         if (uikSummary.keys().isEmpty()) {
             uikSummary = p.parsePages(Shared.pageDir, "third-", "output-uiks.csv", false);
         }
@@ -173,6 +173,8 @@ public class Parser {
                 System.err.printf(" (error in %s: %s) ", dataFile, e.getMessage());
             }
         }
+
+        overall.pruneSubtotals();
 
         PrintWriter pw = new PrintWriter(new File(Shared.resultsDir + "/" + output), "UTF-8");
         emit(overall, pw);
@@ -528,6 +530,25 @@ public class Parser {
                 }
             }
             return result;
+        }
+
+        public void pruneSubtotals() {
+            List<Geography> toPrune = new ArrayList<Geography>();
+
+            int maxSize = 0;
+            for (Geography g : data.keySet()) {
+                maxSize = Math.max(g.size(), maxSize);
+            }
+
+            for (Geography g : data.keySet()) {
+                if (g.size() != maxSize) {
+                    toPrune.add(g);
+                }
+            }
+
+            for (Geography g : toPrune) {
+                data.remove(g);
+            }
         }
     }
 
