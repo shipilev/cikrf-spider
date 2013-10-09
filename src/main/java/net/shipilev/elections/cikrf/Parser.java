@@ -53,7 +53,10 @@ public class Parser {
         Parser p = new Parser();
         SummaryData cikSummary = p.parsePages(Shared.pageDir, "root", "output-ciks.csv", true);
         SummaryData tikSummary = p.parsePages(Shared.pageDir, "first-", "output-tiks.csv", true);
-        SummaryData uikSummary = p.parsePages(Shared.pageDir, "third-", "output-uiks.csv", false);
+        SummaryData uikSummary = p.parsePages(Shared.pageDir, "second-", "output-uiks.csv", true);
+        if (uikSummary.keys().isEmpty()) {
+            uikSummary = p.parsePages(Shared.pageDir, "third-", "output-uiks.csv", false);
+        }
 
         PrintWriter pw = new PrintWriter(System.out);
         pw.println();
